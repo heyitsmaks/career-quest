@@ -1,0 +1,21 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# Local data and credentials
+private/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.log
+
+# Editor and system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
