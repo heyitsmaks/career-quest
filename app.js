@@ -1,126 +1,77 @@
 'use strict';
-const plan=JSON.parse(document.getElementById('plan').textContent);
-const byId=new Map(plan.nodes.map(n=>[n.id,n]));
-const key='career-quest:'+plan.id, route=plan.route, terms=plan.terms||[];
-const $=id=>document.getElementById(id);
+const el=id=>document.getElementById(id),plan=JSON.parse(el('plan').textContent),nodes=new Map(plan.nodes.map(n=>[n.id,n])),route=plan.route,terms=plan.terms||[],key='career-quest:'+plan.id;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const two=n=>String(n).padStart(2,'0');
-const dateText=v=>new Date(v+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
-const millis=a=>a.ms+(a.start?Math.max(0,Date.now()-a.start):0);
-const duration=ms=>{let n=Math.floor(ms/1000);return [Math.floor(n/3600),Math.floor(n/60)%60,n%60].map(two).join(':')};
-let data;try{data=JSON.parse(localStorage.getItem(key)||'null')}catch{}
-data??={};data.items??={};data.history??=[];
-let cloud;let session=data.voyage??={round:1,stop:0,progress:{},reads:{},term:0,active:null,project:0};
-function upgradeReading(){if(plan.readers?.eng?.pages===15&&!session.read15){const r=session.reads.eng;if(r?.target>0&&r.target-r.page<=5)r.target+=10;session.read15=true}}
-upgradeReading();
-function save(){try{localStorage.setItem(key,JSON.stringify(data));cloud?.changed()}catch{$('notice').textContent='Браузер не сохранил прогресс. Проверь доступное место.'}}
+const blocks=plan.aiBlocks||[{title:'Искусственный интеллект и машинное обучение',stage:'Основы',indices:terms.map((_,i)=>i),minutes:10}];
+const dtext=s=>new Date(s+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+const two=n=>String(n).padStart(2,'0'),time=ms=>{const s=Math.floor(ms/1000);return two(Math.floor(s/3600))+':'+two(Math.floor(s/60)%60)+':'+two(s%60)};
+const btn=(id,label,main=false)=>'<button data-act="'+id+'" class="'+(main?'primary':'secondary')+'">'+esc(label)+'</button>';
+let data,session,cloud,tab='voyage';
+try{data=JSON.parse(localStorage.getItem(key))}catch{}
+function setState(state){data=state||{};data.items??={};data.history??=[];session=data.voyage??={round:1,stop:0,reads:{},term:0,active:null,project:0};
+session.learned??=Array.from({length:Math.min(terms.length,session.term||0)},(_,i)=>i);
+if(!session.read15&&plan.readers?.eng?.pages===15){const rd=session.reads.eng;if(rd?.target>0&&rd.target-rd.page<=5)rd.target+=10;session.read15=true}
+session.term=session.learned.length}
+setState(data);
+function save(){try{localStorage.setItem(key,JSON.stringify(data));cloud?.changed()}catch{el('notice').textContent='Не удалось сохранить прогресс на устройстве.'}}
 function rec(id){return data.items[id]??={done:[],note:'',extra:[]}}
-function reading(id){return session.reads[id]??={book:0,page:0,target:0}}
-function steps(id){return [...(plan.guides?.[id]||byId.get(id)?.steps||[]),...(rec(id).extra||[])]}
-function nextIndex(id){return steps(id).findIndex((_,i)=>!rec(id).done.includes(i))}
-function open(id){
- const n=byId.get(id);if(!n||n.blocked&&!rec(id).unblocked)return false;
- if(plan.readers?.[id])return reading(id).book<plan.readers[id].books.length;
- if(id==='ai')return session.term<terms.length;
- return nextIndex(id)>=0;
+function rd(id){return session.reads[id]??={book:0,page:0,target:0}}
+function reminder(id){return !plan.readers?.[id]&&id!=='ai'}
+function available(id){const n=nodes.get(id);if(!n||rec(id).closed||n.blocked&&!rec(id).unblocked)return false;if(id==='ai')return session.term<terms.length;if(plan.readers?.[id])return rd(id).book<plan.readers[id].books.length;return true}
+function project(){const all=(plan.projectStops||[]).filter(available);return all.length?all[session.project%all.length]:null}
+function lane(){return [...route,project()]}
+function current(){return lane()[session.stop]}
+function advance(){if(++session.stop>=lane().length){session.stop=0;session.round++;session.project++}}
+function normalize(){if(![...route,...(plan.projectStops||[])].some(available))return null;for(let j=0;j<lane().length+1;j++){if(available(current()))return current();advance()}return null}
+function nextBlock(){const known=new Set(session.learned);for(const b of blocks){const indices=b.indices.filter(i=>!known.has(i));if(indices.length)return {...b,indices}}}
+function labelTerm(i){return terms[i]?.term||''}
+function assignment(id){const n=nodes.get(id);if(id==='ai'){const b=nextBlock();return {title:b.title,tag:'Самостоятельное изучение',body:'Темы для поиска',block:b,meta:'≈ '+b.minutes+' мин'}}
+ if(plan.readers?.[id]){const r=rd(id),cfg=plan.readers[id],end=r.target||r.page+cfg.pages,book=cfg.books[r.book];return {title:book.split(' · ')[0].split(' — ')[0],tag:'Чтение',body:'Прочитай страницы '+(r.page+1)+'–'+end+'.',meta:(end-r.page)+' стр.',book,end,author:book.split(/ · | — /)[1]||''}}
+ return {title:n.title,tag:'Напоминание',body:n.desc,meta:n.due?'До '+dtext(n.due):'Проект'}}
+const world=window.mountWorld(el('sky'));document.body.classList.toggle('fallback-mode',!world.supported);if(!world.supported)el('flight').textContent='Панорама';
+const dialog=el('sheet');function modal(title,html){dialog.innerHTML='<h2>'+esc(title)+'</h2>'+html;if(!dialog.open)dialog.showModal()}function close(){if(dialog.open)dialog.close()}
+function stamp(a){return (a?.ms||0)+(a?.start?Math.max(0,Date.now()-a.start):0)}
+function start(){if(!session.active){session.active={start:Date.now(),ms:0,total:0,completed:[]};save();render()}}
+const locationNames=['Читальный дом','Обсерватория','Торговая станция','Сигнальная башня','Дом связи','Мастерская'];
+function namesFor(b){return b.indices.map(labelTerm).join(' · ')}
+function searchLinks(b){const q=encodeURIComponent(b.title+' '+b.indices.map(labelTerm).join(' '));return '<div class="search"><a target="_blank" rel="noreferrer" href="https://www.youtube.com/results?search_query='+q+'">YouTube ↗</a><a target="_blank" rel="noreferrer" href="https://www.google.com/search?q='+q+'">Поиск ↗</a></div>'}
+function descFor(t){return t.block?namesFor(t.block):t.book?t.body+' '+t.title:t.title}
+function render(){const id=normalize(),a=session.active;el('roundCaption').textContent='Круг '+two(session.round);
+ if(!id){el('mission').innerHTML='<h2>Маршрут пройден</h2>';el('itinerary').innerHTML='';return}
+ const t=assignment(id),n=nodes.get(id),here=session.stop,where=locationNames[here]||n.short;
+ world.move(here,n.short,descFor(t));el('locNum').textContent=two(here+1);el('locName').textContent=where;
+ el('itinerary').innerHTML='<div class="over"><h3>Текущий круг</h3>'+btn('route','Закрыть')+'</div><ol class="route">'+lane().map((i,j)=>i&&available(i)?'<li class="'+(j===here?'current':'')+'"><b>'+two(j+1)+'</b><span>'+esc(descFor(assignment(i)))+'</span></li>':'').join('')+'</ol>';
+ const content=t.block?'<p class="hint">Темы для самостоятельного поиска:</p><ul class="terms">'+t.block.indices.map(i=>'<li>'+esc(labelTerm(i))+'</li>').join('')+'</ul>'+searchLinks(t.block):'<p class="taskText">'+esc(t.body)+'</p>';
+ const actions=a?(t.block?btn('learn','Изучил темы →',true):t.book?btn('finish','Отметить страницы →',true):btn('next','Дальше по маршруту →',true))+btn('pause',a.start?'Пауза':'Продолжить')+btn('stop','На сегодня всё'):reminder(id)?btn('next','Дальше по маршруту →',true)+btn('start','Засечь время'):btn('start',session.partial?'Продолжить':'Начать',true)+(t.book?btn('bookmark','Указать страницу'):'');
+ el('mission').innerHTML='<div class="over"><span class="kicker">'+esc(t.tag)+' / '+esc(n.short)+'</span><span class="meta">'+esc(t.meta)+'</span></div><h2>'+esc(t.title)+'</h2>'+(t.author?'<div class="author">'+esc(t.author)+'</div>':'')+content+(rec(id).note?'<p class="note">'+esc(rec(id).note)+'</p>':'')+'<div class="actions">'+actions+'</div>'+(a?'<div class="clockline"><span aria-hidden="true">◷</span> <span id="clock">'+time(stamp(a))+'</span></div>':'');
 }
-function project(){const pool=(plan.projectStops||[]).filter(open);if(!pool.length)return null;
- const urgent=pool.find(id=>byId.get(id).due&&new Date(byId.get(id).due+'T23:59:59')-Date.now()<30*86400000);
- return urgent&&session.project%2===0?urgent:pool[session.project%pool.length]}
-function stops(){return [...route,project()].filter(Boolean)}
-function current(){return stops()[session.stop]}
-function advance(){session.stop++;if(session.stop>=stops().length){session.stop=0;session.round++;session.project++}}
-function normalize(){if(!plan.nodes.some(n=>open(n.id)&&(route.includes(n.id)||plan.projectStops?.includes(n.id))))return null;
- for(let i=0;i<route.length+3;i++){if(current()&&open(current()))return current();advance()}return null}
-function moveAfter(wasProject){if(wasProject){session.stop=0;session.round++;session.project++}else advance();normalize()}
-function aiTask(){
- const n=terms[session.term],name=n.term,definition=n.meaning;
- const starter={
- 'AI — Artificial Intelligence':['Опиши распознавание речи в телефоне. Что система получает на вход и что выдаёт человеку?','Пример AI вокруг тебя и его результат.','Какая функция телефона понимает речь?'],
- 'ML — Machine Learning':['Представь фильтр спама. Назови примеры, по которым он может научиться отличать письма.','Одна пара «пример → правильный ответ».','Как телефон узнаёт нежелательное письмо?'],
- 'Dataset':['Вообрази таблицу из десяти квартир. Перечисли три столбца, которые понадобятся для оценки цены.','Названия трёх столбцов и одна строка-пример.','Какие сведения отличают одну квартиру от другой?'],
- 'Feature':['Выбери квартиру. Назови два признака, известных до продажи, и объясни, как один из них может быть связан с ценой.','Два признака и их роль.','Что можно измерить перед продажей?']};
- const prompts={3:'Разбери учебную задачу. Опиши, какие данные в ней нужны и какой результат даёт этот метод.',4:'На примере таблицы квартир покажи, где возникает это понятие при подготовке данных.',5:'Нарисуй маленькую нейросеть и отметь место, где используется это понятие.',6:'Набросай вход, главный компонент и выход архитектуры или механизма.',7:'Проследи один запрос к языковой модели. Отметь, на каком этапе появляется это понятие.',8:'Приведи безопасный пример диалога с ассистентом, в котором это понятие имеет значение.',9:'Объясни, какую задачу это решает при обучении модели. Приведи один конкретный пример.',10:'Возьми помощника по книгам. Объясни роль этого понятия при ответе на вопрос читателя.',11:'Предложи пример оценки классификатора. Объясни, что измеряет или выявляет это понятие.',12:'На примере запуска модели объясни назначение понятия и один связанный с ним параметр.',13:'Опиши смысл для пользователя и одно защитное действие или ограничение на простом бытовом примере.',14:'Набросай схему из двух-трёх элементов и покажи роль понятия в работе нервной системы или устройства.'};
- const ex=starter[name]||[prompts[n.section]||'Приведи свой пример применения и объясни, какую задачу он решает.','Одно предложение своими словами и конкретный пример.','Что об этом понятии ты уже знаешь?'];
- return {title:name,body:definition,instruction:n.exercise||ex[0],proof:ex[1],warm:ex[2],meta:'Термин '+(session.term+1)+' / '+terms.length,unit:n.unit}
-}
-function task(id){
- const n=byId.get(id);if(id==='ai')return aiTask();
- if(plan.readers?.[id]){const r=reading(id),cfg=plan.readers[id];r.target ||=r.page+cfg.pages;
- return {title:cfg.books[r.book],body:'Читай со страницы '+(r.page+1)+' по '+r.target+'. Если уже начал книгу, уточни закладку перед чтением.',instruction:id==='eng'?'Выбери одну фразу героя. Прочитай её вслух и сохрани, если хочешь вернуться к ней.':cfg.exercises?.[r.book]||'Отметь одну идею автора и найди пример из жизни. Если книга закончится раньше, отметь это в итоге шага.',proof:'Последняя прочитанная страница.',warm:id==='eng'?'Какая деталь запомнилась из прошлого чтения? Если начинаешь книгу, что подсказывает название?':'Какое экономическое решение ты принимал на этой неделе?',meta:'Чтение · до '+cfg.pages+' стр.'}}
- const i=nextIndex(id),s=steps(id)[i];return {title:s,body:n.desc,instruction:plan.guides?.[id]?s:'Подготовь результат этого этапа и сохрани ссылку или короткую запись о сделанном.',proof:'Запись о результате, по которой можно продолжить работу.',warm:n.warm||'Какой результат ты хочешь получить в конце этого шага?',meta:'Этап '+(i+1)+' / '+steps(id).length}
-}
-
-const world=window.mountWorld($('sky'));
-document.body.classList.toggle('fallback-mode',!world.supported);
-if(!world.supported)$('flight').textContent='Карта';
-$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else $('notice').textContent='Игра уже занимает доступную область экрана.'}catch{$('notice').textContent='Полный экран недоступен в этом браузере.'}};
-const action=(id,label,main=false)=>'<button type="button" data-action="'+id+'" class="'+(main?'primary':'quiet')+'">'+esc(label)+'</button>';
-function modal(title,body){const d=$('sheet');d.innerHTML='<h2>'+esc(title)+'</h2>'+body;if(!d.open)d.showModal()}
-function closeModal(){if($('sheet').open)$('sheet').close()}
-function pace(){if(!plan.horizon||!terms.length)return '';const today=new Date();today.setHours(0,0,0,0);const days=Math.max(0,Math.round((new Date(plan.horizon+'T00:00:00')-today)/86400000)+1),left=terms.length-session.term;
- return '<div class="pace"><div class="row"><b>Словарь AI</b><span class="pct">'+session.term+' / '+terms.length+'</span></div><progress value="'+session.term+'" max="'+terms.length+'"></progress><p>'+(days?Math.ceil(left*7/days)+' терм. в неделю к '+dateText(plan.horizon):'Срок прошёл · осталось '+left+' терминов')+'</p></div>'}
-function assignment(id){
- const n=byId.get(id),cfg=plan.readers?.[id];
- if(cfg){const r=reading(id),target=r.target||r.page+cfg.pages;return 'Прочитай '+(target-r.page)+' стр. · '+cfg.books[r.book].split(' · ')[0].split(' — ')[0]}
- if(id==='ai')return 'Разбери '+terms[session.term].term.split(' — ')[0]+' и приведи пример';
- return steps(id)[nextIndex(id)]||n.title;
-}
-function render(){const id=normalize(),a=session.active;
- $('horizon').textContent=plan.horizon?'До '+dateText(plan.horizon):'';
- $('roundCaption').textContent='Экспедиция  /  Круг '+two(session.round);
- if(id)world.move(session.stop,byId.get(id).short,assignment(id));
- const lane=stops();$('itinerary').innerHTML='<h3>Задания круга</h3><ol class="route">'+lane.filter(open).map(v=>'<li class="'+(id===v?'current':'')+'"><span>'+esc(assignment(v))+'</span></li>').join('')+'</ol>'+pace();
- if(!id){$('mission').innerHTML='<h2>Маршрут пройден</h2><p>Все доступные этапы завершены.</p>';return}
- const n=byId.get(id),t=task(id);
- $('mission').innerHTML='<div class="over"><span class="eyebrow">Доска заданий · '+esc(n.short)+'</span><span class="muted">'+esc(t.meta)+'</span></div><h2>'+esc(assignment(id))+'</h2><div class="mission-body"><p>'+esc(t.body)+'</p>'+(t.instruction!==t.title?'<p class="instruction">'+esc(t.instruction)+'</p>':'')+'</div>'+(rec(id).note?'<p class="bookmark sml">'+esc(rec(id).note)+'</p>':'')+(a?'<div class="row"><span class="timer" id="clock">'+duration(millis(a))+'</span><small>Время шага</small></div><div class="actions">'+action('done','Готово · лететь дальше →',true)+action('pause',a.start?'Пауза':'Продолжить')+action('stop','На сегодня всё')+'</div>':'<div class="actions">'+action('warm',session.partial?'Продолжить задание →':'Начать задание →',true)+(plan.readers?.[id]?action('bookmark','Уточнить страницу'):'')+'</div>');
-}
-function view(which){document.body.dataset.screen=which;if(which==='atlas')$('itinerary').hidden=true;['voyage','atlas','journal'].forEach(id=>{$(id).hidden=id!==which});document.querySelectorAll('[data-view]').forEach(b=>b.dataset.view===which?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
- if(which==='journal')$('journal').innerHTML='<h1 class="page-title">Журнал экспедиции</h1><div class="content-box journal-list">'+(data.history.length?data.history.map(s=>'<div class="entry"><div class="row"><span class="eyebrow">'+esc(byId.get(s.id)?.short)+'</span><small>'+esc(new Date(s.at).toLocaleDateString('ru-RU'))+' · '+duration(s.ms)+'</small></div><p>'+esc(s.result)+'</p><small>'+esc(s.note)+'</small></div>').join(''):'Здесь появится запись после первого занятия.')+'</div>';
- if(which==='atlas')$('atlas').innerHTML='<h1 class="page-title">Атлас направлений</h1><div class="inventory">'+plan.nodes.map(n=>'<div class="content-box"><span class="eyebrow">'+esc(n.group)+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.desc)+'</p>'+(n.due?'<p class="tag">До '+dateText(n.due)+'</p>':'')+'<details><summary>Материалы и этапы</summary><ol>'+steps(n.id).map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>'+(n.books?'<ol>'+n.books.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>':'')+(n.id==='ai'?'<p>'+terms.length+' понятий · к '+(plan.horizon?dateText(plan.horizon):'концу маршрута')+'</p>':'')+(n.reference?'<p>'+esc(n.reference)+'</p>':'')+(n.source?'<a href="'+esc(n.source)+'" target="_blank" rel="noreferrer">Открыть источник ↗</a>':'')+(n.blocked?'<p>'+esc(n.blocked)+'</p>'+(!rec(n.id).unblocked?action('release-'+n.id,'Условие выполнено'):'Условие подтверждено'):'')+'</details></div>').join('')+'</div>';
-}
-function recordSheet(complete){const id=current(),a=session.active;if(!a)return;a.ms=millis(a);a.start=null;save();render();const t=task(id),rd=plan.readers?.[id]?reading(id):null;
- modal(complete?'Завершить шаг':'На сегодня всё','<span class="tag">'+esc(t.title)+'</span><p>'+esc(complete?t.proof:'Сохрани место остановки. При возвращении маршрут продолжится с этого шага.')+'</p><label>Минуты без пауз<input id="minutes" type="number" step="any" min="0" required value="'+Math.round(a.ms/600)/100+'"></label>'+(rd?'<label>Последняя прочитанная страница<input type="number" required min="'+rd.page+'" id="page" value="'+(complete?rd.target:rd.page)+'"></label>'+(complete?'<label class="inline"><input id="chapterEnd" type="checkbox">Дочитал главу раньше</label><label class="inline"><input id="bookEnd" type="checkbox">Книга закончена</label>':''):'')+'<label>'+(id==='ai'&&complete?'Объяснение своими словами и пример':'Результат или закладка')+'<textarea id="answer" maxlength="2500" rows="2">'+esc(session.partial||'')+'</textarea></label><p id="err" class="error" role="alert"></p><div class="actions">'+action(complete?'confirm':'end',complete?'К следующему шагу →':'Сохранить итог',true)+action('close','Назад')+'</div>');
-}
-function commit(complete){const id=current(),a=session.active;if(!a)return;const t=task(id),minutes=$('minutes');if(!minutes.reportValidity())return;
- const note=$('answer').value.trim();if(id==='ai'&&complete&&!note){$('err').textContent='Запиши хотя бы одно предложение о понятии.';return}
- const rd=plan.readers?.[id]?reading(id):null;
- if(rd){const inp=$('page');if(!inp.reportValidity())return;const p=Number(inp.value),bookEnd=$('bookEnd')?.checked;
- if(complete&&!bookEnd&&!($('chapterEnd')?.checked&&p>rd.page)&&p<rd.target){$('err').textContent='Для частичного чтения выбери «На сегодня всё». Следующая станция откроется после страницы '+rd.target+' или конца главы.';return}
- rd.page=p;if(complete){rd.target=0;if(bookEnd){rd.book++;rd.page=0}}}
- const ms=Math.round(Number(minutes.value)*60000),result=(complete?'Пройдено · ':'Остановка · ')+t.title+(rd?' · до стр. '+$('page').value:'');
- data.history.unshift({id,ms,at:new Date().toISOString(),result,note});a.total+=ms;const total=a.total;
- const completed=[...(a.completed||[])];if(complete)completed.push(t.title);
- rec(id).note=note;session.partial=complete?'':note;
- if(complete){const extra=session.stop>=route.length;if(id==='ai')session.term++;else if(!rd)rec(id).done.push(nextIndex(id));moveAfter(extra);session.active=current()?{ms:0,start:Date.now(),total,completed}:null}
+function bookSheet(complete){const id=current(),r=rd(id),t=assignment(id);modal(complete?'Где закончил чтение?':'На сегодня всё','<p>'+esc(t.title)+'</p><label>Последняя прочитанная страница<input id="page" type="number" min="'+r.page+'" step="1" required value="'+(complete?t.end:r.page)+'"></label>'+(complete?'<label class="check"><input id="chapter" type="checkbox">Глава закончилась раньше</label><label class="check"><input id="bookEnd" type="checkbox">Книга закончена</label>':'')+'<label>Закладка <small>необязательно</small><input id="note" maxlength="600" value="'+esc(session.partial||'')+'"></label><p id="err" role="alert"></p><div class="actions">'+btn(complete?'confirmBook':'confirmStop','Сохранить',true)+btn('close','Назад')+'</div>')}
+function finish(complete,done=false){const id=current(),t=assignment(id),a=session.active||{ms:0,total:0},ms=stamp(a),note=el('note')?.value?.trim()||'';let result=t.block?namesFor(t.block):t.book?t.title:t.title;
+ if(t.book){const input=el('page');if(!input||!input.reportValidity())return;const r=rd(id),page=Number(input.value),bookEnd=el('bookEnd')?.checked;
+ if(complete&&!bookEnd&&page<t.end&&!(el('chapter')?.checked&&page>r.page)){el('err').textContent='Чтобы остановиться здесь, отметь конец главы или выбери «На сегодня всё».';return}
+ r.page=page;r.target=complete?0:t.end;result+=' · стр. '+page;if(bookEnd){r.book++;r.page=0}}
+ if(t.block&&complete){session.learned=[...new Set([...session.learned,...t.block.indices])];session.term=session.learned.length}
+ const total=(a.total||0)+ms,prior=a.completed||[];data.history.unshift({id,ms,at:new Date().toISOString(),result:(complete?'':'Остановка · ')+result,note});
+ rec(id).note=note;session.partial=complete?'':(note||' ');
+ if(complete){if(done)rec(id).closed=true;advance();const next=normalize();session.active=next&&session.active?{ms:0,start:Date.now(),total,completed:[...prior,result]}:null}
  else session.active=null;
- save();closeModal();render();
- if(complete&&!session.active)modal('Экспедиция завершена','<p>Все доступные шаги пройдены.</p><p class="timer">'+duration(total)+'</p>'+action('close','К карте',true));
- if(!complete)modal('Занятие сохранено','<p class="timer">'+duration(total)+'</p>'+(completed.length?'<h3>Пройденные шаги</h3><ul>'+completed.map(v=>'<li>'+esc(v)+'</li>').join('')+'</ul>':'')+'<p>'+esc(result)+'</p><p>'+esc(note)+'</p><p class="muted">Продолжение · '+esc(t.title)+'</p>'+action('close','К карте',true));
-}
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.view){view(b.dataset.view);return}if(b.id==='routeToggle'){$('itinerary').hidden=!$('itinerary').hidden;return}if(b.id==='hideRoute'){$('itinerary').hidden=true;return}const act=b.dataset.action,id=current(),a=session.active;
- if(act?.startsWith('release-')){const n=act.slice(8);rec(n).unblocked=true;save();view('atlas');render();return}
- if(act==='warm'){modal('Войти в тему','<p>'+esc(task(id).warm)+'</p><label>Короткий ответ<input id="focus"></label><div class="actions">'+action('begin','Начать занятие',true)+action('close','Назад')+'</div>');return}
- if(act==='begin'&&!a){session.active={ms:0,start:Date.now(),total:0};save();closeModal();render()}
- if(act==='bookmark'){modal('Закладка','<label>Последняя прочитанная страница<input type="number" min="0" required id="mark" value="'+reading(id).page+'"></label>'+action('mark','Сохранить',true))}
- if(act==='mark'&&$('mark').reportValidity()){const r=reading(id);r.page=Number($('mark').value);r.target=r.page+plan.readers[id].pages;save();closeModal();render()}
- if(act==='pause'&&a){a.ms=millis(a);a.start=a.start?null:Date.now();save();render()}
- if(act==='done')recordSheet(true);if(act==='stop')recordSheet(false);
- if(act==='confirm')commit(true);if(act==='end')commit(false);if(act==='close')closeModal();
+ close();save();render();if(!complete)modal('Занятие сохранено','<p>'+esc(result)+'</p><p>Время за занятие: '+time(total)+'</p>'+(prior.length?'<ul>'+prior.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul>':'')+btn('close','К маршруту',true))}
+function view(which){tab=which;for(const s of ['voyage','atlas','journal'])el(s).hidden=s!==which;document.body.dataset.screen=which;document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-current',b.dataset.view===which?'page':'false'));el('itinerary').hidden=true;
+ if(which==='journal')el('journal').innerHTML='<div class="sectionHead"><small>Бортовой журнал</small><h1>Мои занятия</h1></div><div class="entries">'+(data.history.length?data.history.map(v=>'<article><small>'+esc(new Date(v.at).toLocaleDateString('ru-RU'))+' · '+time(v.ms)+'</small><h3>'+esc(v.result)+'</h3><p>'+esc(v.note)+'</p></article>').join(''):'После первой остановки здесь появится запись.')+'</div>';
+ if(which==='atlas'){const stages=[...new Set(blocks.map(b=>b.stage))],left=terms.length-session.term,days=plan.horizon?Math.max(1,Math.ceil((new Date(plan.horizon+'T23:59:59')-Date.now())/864e5)):0,known=new Set(session.learned);
+ const ai='<article class="study"><small>Самостоятельное изучение</small><h2>Путь по AI и ML</h2><p>'+session.term+' из '+terms.length+' терминов'+(days?' · к '+dtext(plan.horizon)+' · ориентир '+Math.ceil(left*7/days)+' терм. в неделю':'')+'</p><progress value="'+session.term+'" max="'+terms.length+'"></progress>'+stages.map((s,j)=>'<details><summary>'+two(j+1)+' / '+esc(s)+'</summary><ol>'+blocks.filter(b=>b.stage===s).map(b=>'<li>'+ (b.indices.every(i=>known.has(i))?'✓ ':'')+'<b>'+esc(b.title)+'</b><br>'+esc(namesFor(b))+'</li>').join('')+'</ol></details>').join('')+(nodes.get('ai')?.reference?'<p>'+esc(nodes.get('ai').reference)+'</p>':'')+'</article>';
+ el('atlas').innerHTML='<div class="sectionHead"><small>Атлас</small><h1>Мой план</h1></div><div class="inventory">'+ai+plan.nodes.filter(n=>n.id!=='ai').map(n=>'<article><small>'+esc(n.group)+'</small><h2>'+esc(n.title)+'</h2><p>'+esc(n.desc)+'</p>'+(n.due?'<p class="deadline">До '+dtext(n.due)+'</p>':'')+(n.books?'<details><summary>Список книг</summary><ol>'+n.books.map(b=>'<li>'+esc(b)+'</li>').join('')+'</ol></details>':'')+(n.blocked&&!rec(n.id).unblocked?'<p>'+esc(n.blocked)+'</p>'+btn('unlock:'+n.id,n.id==='planner'?'Ответ получен':'Книги изучены'):reminder(n.id)?btn('toggle:'+n.id,rec(n.id).closed?'Вернуть напоминание':'Снять напоминание'):'')+'</article>').join('')+'</div>'}}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.view){view(b.dataset.view);return}const act=b.dataset.act,id=current();
+ if(b.id==='routeToggle'||act==='route'){el('itinerary').hidden=!el('itinerary').hidden;return}
+ if(act==='start')start();if(act==='close')close();
+ if(act==='pause'&&session.active){const a=session.active;a.ms=stamp(a);a.start=a.start?null:Date.now();save();render()}
+ if(act==='bookmark'){modal('Моя закладка','<label>Последняя прочитанная страница<input type="number" min="0" step="1" required id="mark" value="'+rd(id).page+'"></label><div class="actions">'+btn('mark','Сохранить',true)+btn('close','Назад')+'</div>')}
+ if(act==='mark'&&el('mark').reportValidity()){let r=rd(id);r.page=+el('mark').value;r.target=r.page+plan.readers[id].pages;save();close();render()}
+ if(act==='learn'||act==='next')finish(true);
+ if(act==='finish')bookSheet(true);if(act==='confirmBook')finish(true);
+ if(act==='stop'){if(plan.readers?.[id])bookSheet(false);else modal('На сегодня всё','<p>В следующий раз откроется эта же остановка.</p><label>Закладка <small>необязательно</small><input id="note" maxlength="600"></label><div class="actions">'+btn('confirmStop','Сохранить',true)+btn('close','Назад')+'</div>')}
+ if(act==='confirmStop')finish(false);
+ if(act?.startsWith('unlock:')||act?.startsWith('toggle:')){const n=act.split(':')[1];if(act.startsWith('unlock'))rec(n).unblocked=true;else rec(n).closed=!rec(n).closed;save();render();view('atlas')}
 });
-window.addEventListener('storage',e=>{if(e.key===key)location.reload()});
-setInterval(()=>{if($('clock')&&session.active)$('clock').textContent=duration(millis(session.active))},500);
-render();
-cloud=connectProgress(key,()=>data,remote=>{
- if(!remote?.voyage)return;
- const changed=JSON.stringify(remote)!==JSON.stringify(data);
- data=remote;session=data.voyage;upgradeReading();
- localStorage.setItem(key,JSON.stringify(data));
- if(changed){closeModal();render();view(document.body.dataset.screen||'voyage')}
-});
-if(data.active&&!data.converted){
- const old=data.active,n=byId.get(old.id);
- const minutes=Math.round(((old.ms||0)+(old.start?Math.max(0,Date.now()-old.start):0))/600)/100;
- modal('Сохранить прежнее занятие','<p>'+esc(n?.steps?.[old.step]||n?.title||'Занятие')+'</p><label>Проверь длительность в минутах<input id="oldMinutes" type="number" min="0" step="any" required value="'+minutes+'"></label><div class="actions"><button id="archive" class="primary">Записать в журнал</button></div>');
- $('archive').onclick=()=>{const m=$('oldMinutes');if(!m.reportValidity())return;data.history.unshift({id:old.id,at:new Date().toISOString(),ms:Number(m.value)*60000,result:'Прежнее занятие · '+(n?.steps?.[old.step]||n?.title||''),note:rec(old.id).note});data.active=null;data.converted=true;save();closeModal()};
-}
+el('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else el('notice').textContent='Игра уже занимает доступный экран.'}catch{el('notice').textContent='Полный экран недоступен.'}};
+window.addEventListener('storage',e=>{if(e.key===key)location.reload()});setInterval(()=>{if(el('clock')&&session.active)el('clock').textContent=time(stamp(session.active))},500);
+render();cloud=connectProgress(key,()=>data,remote=>{if(!remote?.voyage)return;const changed=JSON.stringify(remote)!==JSON.stringify(data);setState(remote);localStorage.setItem(key,JSON.stringify(data));if(changed){close();render();view(tab)}});
