@@ -1,3 +1,45 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#131a2b"><title>Career Quest · Горный маршрут</title><link rel="stylesheet" href="app.css"></head><body>
-<header><div class="head"><div class="brand"><svg aria-hidden="true" viewBox="0 0 40 30"><path d="M2 25 15 4l6 10 4-6 12 17H2Zm10-8 3-5 3 5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg><span>Career Quest</span></div><nav aria-label="Разделы"><button data-view="voyage" aria-current="page">Полёт</button><button data-view="atlas">Атлас</button><button data-view="journal">Журнал</button></nav><span id="sync" role="status">Подключение…</span><button id="fullscreen" title="Полный экран" aria-label="Полный экран"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button></div></header>
-<main><section id="voyage"><div class="landscape"><img class="art" src="assets/archipelago.png" alt=""><canvas id="sky" aria-label="Горный маршрут в 3D. Потяни экран, чтобы осмотреться."></canvas></div><div class="flightHUD"><strong id="locNum">01</strong><div><span id="flight">В полёте</span><h1 id="locName">Читальный дом</h1></div></div><div class="flightButtons"><button id="boost">Ускорить ↑</button><button id="routeToggle">Маршрут <span>☰</span></button></div><div class="mapCaption"><i></i><span id="roundCaption"></span></div><article id="mission" aria-live="polite"></article><aside id="itinerary" hidden></aside></section><section id="atlas" hidden></section><section id="journal" hidden></section></main><div id="notice" role="status"></div><dialog id="sheet"></dialog><script id="plan" type="application/json">{"id":"demo-map-v1","horizon":"","route":["read","ai","atlas","look","make"],"terms":[{"term":"AI — Artificial Intelligence","meaning":"Искусственный интеллект объединяет методы решения задач, требующих распознавания, рассуждения или обучения.","unit":"Основы","section":2},{"term":"ML — Machine Learning","meaning":"Машинное обучение находит закономерности по примерам.","unit":"Основы","section":2}],"readers":{"read":{"books":["Книга путешественника"],"pages":5}},"nodes":[{"id":"read","title":"Чтение","short":"Чтение","steps":["Прочитай пять страниц и запиши последнюю."],"group":"Маршрут","desc":"Прочитай пять страниц и запиши последнюю."},{"id":"ai","title":"AI и ML","short":"AI и ML","steps":["Изучи одно понятие."],"group":"Маршрут","desc":"Изучи одно понятие."},{"id":"atlas","title":"Картография","short":"Картография","steps":["Нарисуй остров и обозначь три ориентира.","Нанеси путь между ориентирами."],"group":"Маршрут","desc":"Нарисуй остров и обозначь три ориентира."},{"id":"look","title":"Обсерватория","short":"Обсерватория","steps":["Запиши два наблюдения о ночном небе."],"group":"Маршрут","desc":"Запиши два наблюдения о ночном небе."},{"id":"make","title":"Мастерская","short":"Мастерская","steps":["Нарисуй эскиз летательного аппарата."],"group":"Маршрут","desc":"Нарисуй эскиз летательного аппарата."}]}</script><script src="world.bundle.js"></script><script src="cloud.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f8f7f1">
+  <title>Career Quest · Линия маршрута</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header><div class="head">
+  <a class="brand" href="#voyage" data-home aria-label="Career Quest, маршрут"><span class="logo" aria-hidden="true"><i></i><i></i><i></i></span>Career Quest</a>
+  <nav aria-label="Разделы"><button data-view="voyage" aria-current="page">Маршрут</button><button data-view="atlas">Атлас</button><button data-view="journal">Журнал</button></nav>
+  <span id="sync" role="status">Подключение…</span><button id="fullscreen" aria-label="Полный экран" title="Полный экран">⛶</button>
+</div></header>
+<main>
+<section id="voyage">
+  <div class="pagehead"><h1>Мой маршрут<span>.</span></h1><span id="roundCaption"></span></div>
+  <div class="spread">
+    <section class="network" aria-label="Схема текущего круга">
+      <div class="network-head"><b><i></i> Кольцевая линия</b><span id="stopCount"></span></div>
+      <svg viewBox="0 28 640 375" role="img" aria-labelledby="mapName"><title id="mapName">Станции текущего круга</title>
+        <defs>
+          <pattern id="blocks" width="66" height="59" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)"><rect x="3" y="3" width="58" height="51" rx="5" fill="#dee2d6" opacity=".55"/></pattern>
+          <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".65" fill="#52646c" opacity=".2"/></pattern>
+        </defs>
+        <rect width="640" height="440" fill="#f1f0e6"/><rect width="640" height="440" fill="url(#blocks)"/>
+        <path d="M-35 55Q95 240 187 227T337 212Q394 221 434 270T681 286" stroke="#bfd7d9" stroke-width="33" fill="none"/>
+        <path d="M-30 49Q93 231 186 219T339 204Q399 214 440 261T681 278" stroke="#dde9e5" stroke-width="2" fill="none"/>
+        <path d="M-45 363 102 224 220 191 406 51 532 -12M317 451 347 322 427 261 661 186" stroke="#faf9ef" stroke-width="15" fill="none"/>
+        <rect width="640" height="440" fill="url(#dots)"/>
+        <path class="undertrack" fill="none"/><path class="track" fill="none"/>
+        <path d="m226 121 5 4-5 4m175 198-5 4 5 4" stroke="#fffdf3" stroke-width="2.5" fill="none"/>
+        <g class="stations"></g><g class="train"><circle r="16" fill="#fffdf3" stroke="#fa603c" stroke-width="3"/><circle r="9" fill="#e65632"/><circle r="3" fill="#fffdf3"/></g>
+      </svg>
+      <div class="mapkey"><span><i class="here"></i> Ты здесь</span><span><i class="dot"></i> Станция</span></div>
+    </section>
+    <article id="mission" aria-live="polite"></article>
+  </div>
+  <section class="itinerary"><h2>Дальше по линии</h2><ol id="itinerary"></ol></section>
+</section><section id="atlas" hidden></section><section id="journal" hidden></section>
+</main><div id="notice" role="status"></div><dialog id="sheet"></dialog>
+<script id="plan" type="application/json">{"id":"demo-map-v1","horizon":"","route":["read","ai","atlas","look","make"],"terms":[{"term":"AI — Artificial Intelligence","meaning":"Искусственный интеллект объединяет методы решения задач, требующих распознавания, рассуждения или обучения.","unit":"Основы","section":2},{"term":"ML — Machine Learning","meaning":"Машинное обучение находит закономерности по примерам.","unit":"Основы","section":2}],"readers":{"read":{"books":["Книга путешественника"],"pages":5}},"nodes":[{"id":"read","title":"Чтение","short":"Чтение","steps":["Прочитай пять страниц и запиши последнюю."],"group":"Маршрут","desc":"Прочитай пять страниц и запиши последнюю."},{"id":"ai","title":"AI и ML","short":"AI и ML","steps":["Изучи одно понятие."],"group":"Маршрут","desc":"Изучи одно понятие."},{"id":"atlas","title":"Картография","short":"Картография","steps":["Нарисуй остров и обозначь три ориентира.","Нанеси путь между ориентирами."],"group":"Маршрут","desc":"Нарисуй остров и обозначь три ориентира."},{"id":"look","title":"Обсерватория","short":"Обсерватория","steps":["Запиши два наблюдения о ночном небе."],"group":"Маршрут","desc":"Запиши два наблюдения о ночном небе."},{"id":"make","title":"Мастерская","short":"Мастерская","steps":["Нарисуй эскиз летательного аппарата."],"group":"Маршрут","desc":"Нарисуй эскиз летательного аппарата."}]}</script>
+<script src="transit.js"></script><script src="cloud.js"></script><script src="app.js"></script>
+</body></html>

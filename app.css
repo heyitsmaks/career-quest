@@ -1,2 +1,119 @@
-:root{color-scheme:dark;--ink:#121a29;--panel:#182438;--cream:#f4f2ef;--soft:#c5cfdd;--lamp:#ffc386;--line:#ffffff29;font-family:"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;color:var(--cream);background:#151e30}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;min-height:100vh}button,input{font:inherit}button{cursor:pointer}button,a,input,summary{outline-offset:4px}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--lamp)}button{border:1px solid var(--line);background:#202c40;color:var(--cream);border-radius:6px;padding:8px 13px;min-height:40px;font-size:14px;font-weight:600}button:hover{border-color:#c6d3e8}button.primary{color:#352317;background:var(--lamp);border-color:transparent}button.primary:hover{background:#ffd2a6}button.secondary{background:#ffffff08}a{color:var(--lamp)}h1,h2,h3,p{margin:0}small,.meta,.hint,.author{color:var(--soft)}.head{height:65px;display:flex;gap:25px;align-items:center;padding:0 clamp(16px,3vw,50px);background:#101a2ae6;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}header{position:fixed;inset:0 0 auto;z-index:6}.brand{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:740;letter-spacing:-.045em;white-space:nowrap}.brand svg{width:39px;color:var(--lamp)}nav{align-self:stretch;display:flex;gap:12px}nav button{padding:0 5px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--soft);border-radius:0;font-size:14px}nav [aria-current="page"]{border-bottom-color:var(--lamp);color:white}#sync{margin-left:auto;color:#cbd2df;font-size:12px}#fullscreen{min-height:36px;width:36px;padding:7px;background:none}#fullscreen svg{width:18px;vertical-align:middle}#voyage,.landscape{position:fixed;inset:0}.landscape{background:#202843}.art,#sky{display:block;position:absolute;width:100%;height:100%;inset:0;object-fit:cover}.landscape .art{visibility:hidden}.fallback-mode .art{visibility:visible}.landscape canvas{touch-action:none;cursor:grab}.landscape canvas:active{cursor:grabbing}.flightHUD,.flightButtons,.mapCaption,#mission,#itinerary{position:absolute;z-index:1}.flightHUD{top:87px;left:clamp(16px,3vw,50px);display:flex;align-items:center;gap:12px;text-shadow:0 2px 8px #071024;background:#10182b9e;padding:8px 14px 9px 10px;border-radius:4px}.flightHUD strong{font:500 28px/1 Consolas,monospace;letter-spacing:-.09em;padding-right:12px;border-right:1px solid #ffffff55;color:var(--lamp)}.flightHUD #flight,.mapCaption{font-size:11px;letter-spacing:.09em;text-transform:uppercase}.flightHUD h1{font-size:18px;letter-spacing:-.02em;line-height:1.15}.flightButtons{top:88px;right:clamp(16px,3vw,50px);display:flex;gap:8px}.flightButtons button{background:#172438db}.flightButtons span{margin-left:5px;font-size:13px}#boost{visibility:hidden;touch-action:none;user-select:none}.flying #boost{visibility:visible}.mapCaption{bottom:34px;left:3vw;display:flex;align-items:center;gap:9px;background:#10182b9e;padding:7px 10px}.mapCaption i{background:var(--lamp);height:2px;width:18px}#mission,#itinerary,dialog{border:1px solid #66778e;border-top:2px solid var(--lamp);background:linear-gradient(128deg,#233247f5,#131d30fa);box-shadow:0 12px 38px #08101f55;border-radius:4px 4px 12px 12px}#mission{right:clamp(14px,3vw,50px);bottom:clamp(18px,4vh,44px);width:min(385px,40vw);padding:19px 22px;max-height:58dvh;overflow:auto}.over,.actions,.search{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.over{justify-content:space-between}.kicker,.sectionHead small,.inventory article>small{font-size:10px;letter-spacing:.11em;font-weight:700;text-transform:uppercase;color:var(--lamp)}.meta,.author,.hint,.clockline,.search{font-size:13px}.meta{font-variant-numeric:tabular-nums}#mission h2,dialog h2{margin:11px 0 4px;font-size:clamp(22px,2.15vw,32px);letter-spacing:-.035em;line-height:1.1;text-wrap:balance}#mission .taskText{font-size:16px;line-height:1.42;margin:9px 0 12px}.author{margin:4px 0}.actions{margin-top:12px}.search{margin:9px 0}.search a{text-decoration:none;border-bottom:1px solid #dba77988}.search a+a{margin-left:9px}.terms{list-style:square;margin:6px 0;padding-left:22px;font-size:15px;line-height:1.5}.terms li::marker{color:var(--lamp)}.hint{margin-top:10px}.clockline{margin-top:10px;color:var(--soft);font-variant-numeric:tabular-nums}.note{font-size:13px;color:#f2cfb3;margin-top:7px}.primary,.secondary{font-size:13px}#itinerary{top:140px;right:3vw;width:min(355px,91vw);max-height:62dvh;overflow:auto;padding:17px;z-index:4}.route{list-style:none;padding:0}.route li{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}.route b{font:13px Consolas,monospace;color:var(--soft)}.route .current,.route .current b{color:var(--lamp)}#atlas,#journal{max-width:1160px;margin:auto;padding:99px clamp(16px,4vw,52px) 50px}.sectionHead h1{font-size:clamp(32px,5vw,54px);letter-spacing:-.06em;margin:8px 0 25px}.inventory{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px}.inventory article,.entries article{background:#1c293b;border:1px solid var(--line);border-radius:8px;padding:20px}.inventory h2,.entries h3{font-size:21px;letter-spacing:-.025em;line-height:1.2;margin:7px 0}.inventory p,.entries p,.inventory li{line-height:1.5;color:var(--soft);font-size:15px;margin:7px 0}.inventory .study{grid-column:1/-1}.inventory details{border-top:1px solid var(--line);padding:11px 0}.inventory summary{cursor:pointer;font-weight:600}.inventory progress{width:100%;height:7px;accent-color:var(--lamp);margin:8px 0 14px}.deadline{color:var(--lamp)!important}.entries{display:grid;gap:10px}.entries small{font-variant-numeric:tabular-nums}dialog{padding:22px;width:min(420px,92vw);color:var(--cream);max-height:88dvh}dialog::backdrop{background:#071020ac}dialog label:not(.check){display:block;margin:14px 0}dialog input:not([type=checkbox]){display:block;margin-top:6px;width:100%;padding:9px;background:#111b2c;color:var(--cream);border:1px solid #7a889d;border-radius:4px}dialog input[type=checkbox]{accent-color:var(--lamp)}.check{display:block;font-size:14px;margin:7px 0}#err{color:#ffd9a8}.check small{font-size:12px}#notice:not(:empty){position:fixed;z-index:10;left:10px;bottom:8px;max-width:min(450px,96%);background:#192131;color:white;padding:8px}
-@media(max-width:660px){.head{height:51px;gap:10px;padding:0 9px}.brand{gap:5px;font-size:14px}.brand svg{width:24px}nav{gap:7px}nav button{padding:0;font-size:12px}#sync{font-size:9px;width:min-content}#fullscreen{width:29px;min-height:30px;padding:4px}.flightHUD{top:65px;left:10px;gap:7px;padding:6px 8px}.flightHUD strong{font-size:23px;padding-right:7px}.flightHUD #flight{font-size:9px}.flightHUD h1{font-size:14px}.flightButtons{top:66px;right:10px;gap:4px}.flightButtons button{min-height:34px;font-size:11px;padding:5px 7px}.mapCaption{display:none}#mission{bottom:max(10px,env(safe-area-inset-bottom));width:auto;left:10px;right:10px;max-height:45dvh;padding:12px 15px}#mission h2{font-size:23px;margin:6px 0}.hint,.author{margin-top:4px}#mission .taskText{margin:6px 0;font-size:15px}.actions{gap:5px;margin-top:8px}.primary,.secondary{min-height:38px;padding:6px 9px}.clockline{margin-top:4px;font-size:11px}.kicker{font-size:9px}#itinerary{top:111px;right:10px}#atlas,#journal{padding-top:75px}}@media(max-width:350px){.brand span{display:none}}@media(max-height:500px) and (orientation:landscape){#mission{max-height:63dvh;width:40vw;left:auto}.flightHUD,.flightButtons{top:68px}}
+:root {
+  color-scheme: light;
+  --ink: #172d3e;
+  --blue: #193e96;
+  --paper: #f8f7f1;
+  --line: #c7cabe;
+  --muted: #52616a;
+  --orange: #db4a29;
+  font: 16px/1.45 Inter, Roboto, "Segoe UI", Arial, sans-serif;
+  color: var(--ink); background: var(--paper);
+}
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { margin: 0 }
+button, input { font: inherit }
+button, summary { cursor: pointer }
+button, a { -webkit-tap-highlight-color: transparent }
+button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid #dc582e; outline-offset: 4px }
+button { color: inherit }
+a { color: var(--blue) }
+h1, h2, h3, p { margin: 0 }
+header { background: #fbfaf5; border-bottom: 1px solid var(--line) }
+.head, main { max-width: 1320px; margin: 0 auto; padding-inline: clamp(16px, 4.5vw, 76px) }
+.head { min-height: 67px; display: flex; align-items: center; gap: clamp(10px, 2.8vw, 44px) }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 760; font-size: 21px; letter-spacing: -.045em; white-space: nowrap }
+.logo { display: flex; gap: 2px; align-items: end; padding: 7px; background: var(--blue); width: 34px; height: 34px; border-radius: 9px }
+.logo i { display: block; width: 5px; height: 12px; background: white; transform: skewY(-26deg) }
+.logo i:nth-child(2) { height: 18px }
+.logo i:nth-child(3) { height: 14px; background: #ffab80 }
+nav { display: flex; gap: 4px }
+nav button, #fullscreen { border: 0; border-radius: 6px; background: none; min-height: 40px; font-size: 14px; font-weight: 650; padding: 7px 12px }
+nav [aria-current="page"] { background: #e6ebf4; color: var(--blue) }
+#sync { margin-left: auto; color: var(--muted); font-size: 12px }
+#fullscreen { font-size: 23px; padding: 0 6px }
+main { padding-bottom: 45px }
+.pagehead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: clamp(20px, 4vh, 52px) 0 21px }
+h1 { font-size: clamp(36px, 5vw, 70px); letter-spacing: -.065em; line-height: 1.04; font-weight: 760 }
+.pagehead h1 span { color: var(--orange) }
+#roundCaption { font-weight: 650; font-size: 14px; color: var(--muted); border-bottom: 2px solid var(--orange); padding-bottom: 3px }
+.spread { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); align-items: stretch; gap: 18px }
+.network, #mission, .inventory article, .entries article { border: 1px solid var(--line); border-radius: 12px; overflow: hidden }
+.network { background: #f1f0e6; display: flex; flex-direction: column }
+.network-head, .mapkey { display: flex; align-items: center; gap: 16px; padding: 12px 18px; font-size: 13px; background: #fbfaf4 }
+.network-head { justify-content: space-between; border-bottom: 1px solid var(--line) }
+.network-head b, .mapkey span { display: inline-flex; align-items: center; gap: 7px }
+.network-head b i { width: 24px; height: 5px; background: var(--blue); border-radius: 10px }
+#stopCount, .mapkey { color: var(--muted) }
+.network svg { width: 100%; display: block; height: auto; margin: auto 0 }
+.track, .undertrack { stroke-linejoin: round; stroke-linecap: round }
+.track { stroke: var(--blue); stroke-width: 9 }
+.undertrack { stroke: #fffefa; stroke-width: 16 }
+.stations circle { stroke: var(--blue); fill: #fffefa; stroke-width: 3.5 }
+.stations text { font: 670 21px Inter, Roboto, "Segoe UI", Arial, sans-serif; letter-spacing: -.04em; fill: var(--ink); paint-order: stroke; stroke: #f1f0e6; stroke-width: 6px; stroke-linejoin: round }
+.stations .current text { fill: #a8381e }
+.mapkey { margin-top: auto; border-top: 1px solid var(--line); font-size: 12px; padding-block: 9px }
+.here, .dot, .nextdot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--blue); background: white; display: inline-block }
+.here { background: var(--orange); border: 2px solid white; outline: 1px solid var(--orange) }
+#mission { display: flex; flex-direction: column; padding: clamp(18px, 2.6vw, 40px); background: #fffef9; border-top: 5px solid var(--blue) }
+.over { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px }
+.kicker, .sectionHead small, .inventory article > small { font-size: 12px; font-weight: 720; letter-spacing: .035em; color: var(--blue) }
+.meta { font-size: 13px; white-space: nowrap; color: var(--muted) }
+#mission h2 { font-size: clamp(25px, 3.2vw, 48px); line-height: 1.07; letter-spacing: -.055em; margin: 22px 0 4px; overflow-wrap: anywhere }
+.author, .hint, .note, small { color: var(--muted) }
+.author { font-size: 14px }
+.taskText, .hint { margin: 18px 0 12px }
+.taskText { font-size: clamp(16px, 1.4vw, 20px) }
+.terms { padding-left: 23px; margin: 0 0 10px; line-height: 1.5 }
+.terms li::marker { color: var(--orange) }
+.search, .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px }
+.search a { font-size: 14px; margin-right: 8px }
+.actions { padding-top: 15px; margin-top: 12px; border-top: 1px dashed var(--line) }
+#mission .actions { margin-top: auto }
+.primary, .secondary { border-radius: 6px; padding: 9px 13px; min-height: 42px; font-size: 14px; font-weight: 640; border: 1px solid var(--line); background: transparent }
+.primary { background: var(--blue); color: white; border-color: var(--blue) }
+.primary:hover { background: #122e74 }
+.secondary:hover, nav button:hover { background: #e8edf2 }
+.clockline { font-variant-numeric: tabular-nums; font-size: 13px; margin-top: 9px; color: var(--muted) }
+.itinerary { margin-top: 30px }
+.itinerary h2 { font-size: 23px; letter-spacing: -.04em }
+#itinerary { margin: 13px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border-top: 1px solid var(--line); list-style: none }
+#itinerary li { display: flex; gap: 10px; padding: 13px 16px 0 0 }
+.nextdot { flex: 0 0 10px; height: 10px; margin-top: 6px }
+#itinerary p { font-size: 14px; color: var(--muted); margin-top: 3px }
+.sectionHead { margin: 30px 0 22px }
+.sectionHead h1 { margin-top: 7px }
+.inventory { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(260px,100%),1fr)); gap: 14px }
+.inventory article, .entries article { padding: 20px; background: #fffef9 }
+.inventory h2, .entries h3 { margin: 5px 0; line-height: 1.15; letter-spacing: -.03em }
+.inventory p, .inventory li, .entries p { margin: 8px 0; color: var(--muted) }
+.inventory .study { grid-column: 1/-1 }
+.inventory details { border-top: 1px solid var(--line); padding: 9px 0 }
+.inventory summary { font-weight: 600 }
+.inventory progress { width: 100%; accent-color: var(--blue); margin: 8px 0 12px }
+.entries { display: grid; gap: 9px }
+dialog { width: min(420px, 92vw); max-height: 90dvh; padding: 24px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: #fffef9 }
+dialog::backdrop { background: #13263a77 }
+dialog h2 { letter-spacing: -.04em; line-height: 1.12; margin-bottom: 10px }
+dialog label { display: block; margin: 10px 0 }
+dialog input:not([type=checkbox]) { display: block; width: 100%; margin-top: 4px; padding: 10px; color: var(--ink); background: white; border: 1px solid #87929a; border-radius: 5px }
+input[type=checkbox] { accent-color: var(--blue) }
+#err { color: #a93819 }
+#notice:not(:empty) { position: fixed; bottom: 12px; left: 12px; z-index: 5; max-width: 92vw; background: var(--ink); color: white; padding: 10px 14px; border-radius: 6px }
+@media(max-width: 720px) {
+  .head { gap: 8px; min-height: 54px; padding-inline: 10px; flex-wrap: wrap }
+  .brand { font-size: 15px; gap: 5px }
+  .logo { width: 23px; height: 24px; padding: 4px; gap: 1px; border-radius: 5px }
+  .logo i { width: 4px; height: 9px }.logo i:nth-child(2) { height: 14px }.logo i:nth-child(3) { height: 11px }
+  nav { gap: 0 } nav button { font-size: 12px; padding: 6px }
+  #sync { font-size: 10px } #fullscreen { display:none }
+  .spread { grid-template-columns: 1fr; gap: 12px }
+  .pagehead { margin: 17px 0 12px } h1 { font-size: 36px }
+  #mission { grid-row: 1; padding: 15px 16px }
+  #mission h2 { font-size: 27px; margin: 10px 0 2px }
+  .taskText,.hint { margin: 8px 0 }
+  .actions { padding-top: 9px } .network-head { padding: 8px 12px }
+  .network svg { max-height: 35vh } .mapkey { padding: 6px 12px } .itinerary { margin-top: 20px }
+  #itinerary { grid-template-columns: 1fr } #itinerary li { padding: 8px 0 }
+}
+@media(max-width: 365px) { #sync { width: 100%; text-align: right; margin-top: -6px; padding-bottom: 3px } }
